@@ -8,6 +8,7 @@ from preproc import (
     Normalization,
     FeatureSelection,
     DimensionalityReduction,
+    NearestNeighborGraph,
     Clustering
 )
 
@@ -57,6 +58,10 @@ def main(output_file):
         scale_max_value
     )
 
+    # Must carry out nearest neighborhood graph construction
+    nearest_neighbor = NearestNeighborGraph()
+    adata = nearest_neighbor.run_nn(adata, n_neighbors)
+    
     clustering = Clustering()
     adata = clustering.run_clustering(adata, leiden_resolution)
 
