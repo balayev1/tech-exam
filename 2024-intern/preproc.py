@@ -26,6 +26,9 @@ class DataLoader:
 
 
 class QualityControl:
+    def add_mitochondria(self, adata):
+        adata.var["mt"] = adata.var_names.str.startswith("MT-") # make sure to add mitochondrial gene proportions before estimating qc metrics
+        
     def filter_cells(self, adata, min_genes, max_genes):
         sc.pp.filter_cells(adata, min_genes=min_genes)
         sc.pp.filter_cells(adata, max_genes=max_genes)
@@ -39,6 +42,7 @@ class QualityControl:
 
     def run_qc_checks(self, adata, min_genes_per_cell, max_genes_per_cell,
                       min_cells_per_gene):
+        self.add_mitochondria(adata)
         self.filter_cells(adata, min_genes_per_cell, max_genes_per_cell)
         self.filter_genes(adata, min_cells_per_gene)
         self.calculate_qc_metrics(adata)
@@ -86,7 +90,11 @@ class DimensionalityReduction:
         sc.pp.neighbors(adata, n_neighbors=n_neighbors, n_pcs=n_pcs)
         sc.tl.umap(adata, min_dist=min_dist)
         return adata
-
+        
+class NearestNeighborGraph: # make weighted adjacency matrix of the neighborhood graph of cells based on which clustering would be done
+    def run_nn(self, adata, n_neighbors):
+        sc.pp.neighbors(adata, n_neighbors=n_neighbors)
+        return adata
 
 class Clustering:
     def run_leiden(self, adata, resolution):
